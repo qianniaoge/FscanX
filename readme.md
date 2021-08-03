@@ -34,7 +34,7 @@
 ![img.png](image/img.png)
 <br> 上述为一些使用例子，详细可使用-h或--help查看帮助
 <br> 视频演示：（演示系统Linux 采用upx编译FscanX_amd64）
-[![asciicast](https://asciinema.org/a/1eVs5RPQXLIyrcaZ68zrwdu0P.svg)](https://asciinema.org/a/1eVs5RPQXLIyrcaZ68zrwdu0P)
+[![asciicast](https://asciinema.org/a/428622.svg)](https://asciinema.org/a/428622)
 <br> 最后：
 <br> 感谢：https://github.com/shadow1ng/fscan
 <br> 感谢：https://github.com/k8gege/LadonGo
