@@ -36,3 +36,12 @@
 <br> 最后：
 <br> 感谢：https://github.com/shadow1ng/fscan
 <br> 感谢：https://github.com/k8gege/LadonGo
+
+<br> 2021-8-3 更新：
+<br> 1.修复了部分代码逻辑错误，对部分代码逻辑进行修改
+<br> 2.对hostscan扫描方式做出改变，对hostscan 的--noping参数首先采用netbios的存活检测，如果netbios检测失败，则会尝试icmp协议检测而非ping命令检测
+<br> 3.对portscan增加--cmd参数，用于ssh连接后执行命令
+<br> 4.取消portscan的netbios参数
+<br> 5.修复portscan中对于sshkey的验证问题
+
+<br> 如有问题可以提出issue，我们共同商讨解决
