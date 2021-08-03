@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-var mutex sync.Mutex
-
 // 对存活主机的IP列表进行并发处理
 
 func PortScan(thread int64,ports []int,iplist []string)[]config.PortResult{

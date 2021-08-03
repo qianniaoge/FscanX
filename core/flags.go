@@ -2,6 +2,7 @@ package core
 
 import (
 	"FscanX/config"
+	"fmt"
 	"github.com/urfave/cli/v2"
 	"os"
 	"reflect"
@@ -142,11 +143,6 @@ func GetFlags(){
 						Value: false,
 						Usage: "Detection and blasting of vulnerable ports",
 					},
-					&cli.BoolFlag{
-						Name: "netbios",
-						Value: false,
-						Usage: "Detects netbios and output details",
-					},
 					&cli.StringFlag{
 						Name: "sk",
 						Usage: "Use ssh key certification (as --sk id_rsa)",
@@ -159,12 +155,15 @@ func GetFlags(){
 						Name: "rs",
 						Usage: "redis shell to write cron file (as: --rs 192.168.1.1:6666)",
 					},
+					&cli.StringFlag{
+						Name: "cmd",
+						Usage: "execute shell command when connect ssh",
+					},
 				},
 				Action: func(c *cli.Context) error {
 					enter.NoPing = reflect.ValueOf(c.Value("noping")).Bool()
 					enter.Fragile = reflect.ValueOf(c.Value("fragile")).Bool()
 					enter.Thread = reflect.ValueOf(c.Value("thread")).Int()
-					enter.Netbios = reflect.ValueOf(c.Value("netbios")).Bool()
 					if reg.MatchString(c.Args().Get(0)) == true{
 						enter.ScanHost = c.Args().Get(0)
 					}
@@ -173,13 +172,16 @@ func GetFlags(){
 						enter.Ports = reflect.ValueOf(c.Value("port")).String()
 					}
 					if reflect.ValueOf(c.Value("sk")).String() != ""{
-						enter.Sshkey = reflect.ValueOf(c.Value("sshkey")).String()
+						enter.Sshkey = reflect.ValueOf(c.Value("sk")).String()
 					}
 					if reflect.ValueOf(c.Value("rf")).String() != ""{
 						config.RedisFile = reflect.ValueOf(c.Value("rf")).String()
 					}
 					if reflect.ValueOf(c.Value("rs")).String() != ""{
 						config.RedisFile = reflect.ValueOf(c.Value("rs")).String()
+					}
+					if reflect.ValueOf(c.Value("cmd")).String() != ""{
+						enter.Command = reflect.ValueOf(c.Value("cmd")).String()
 					}
 					return nil
 				},
@@ -237,7 +239,12 @@ func GetFlags(){
 		},
 	}
 	app.Usage = "A Large killer focused on intranet scanning"
-	 _ = app.Run(os.Args)
+	_ = app.Run(os.Args)
+	if len(os.Args) < 3 || (len(enter.ScanHost) <= 0 || enter.ScanHost == ""){
+		fmt.Println("FscanX.exe [global options] command [command options] [arguments...] HOST")
+		return
+	}else{
+		Scanner(enter)
+	}
 
-	 Scanner(enter)
 }

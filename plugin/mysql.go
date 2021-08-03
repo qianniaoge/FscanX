@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func MysqlScan(info *config.HostData) (tmperr error)  {
+func MYSQLSCAN(info *config.HostData) (tmperr error)  {
 	var starttime = time.Now().Unix()
 	// 遍历字典用户名
 	for _,user := range config.Userdict["mysql"]{

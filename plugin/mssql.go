@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-func MssqlScan(info *config.HostData) (tmperr error)  {
+func MSSQLSCAN(info *config.HostData) (tmperr error)  {
 	var starttime = time.Now().Unix()
 	// 遍历字典用户名
 	for _,user := range config.Userdict["mssql"]{
-		 // 遍历密码字典
+		// 遍历密码字典
 		for _ ,pass := range config.Passwords {
 			pass = strings.Replace(pass,"{user}",user,-1)
 			flag, err := mssqlConn(info,user,pass)

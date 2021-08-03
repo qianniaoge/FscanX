@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func SshScan(info *config.HostData)(tmperr error) {
+func SSHSCAN(info *config.HostData)(tmperr error) {
 	var starttime = time.Now().Unix()
 	// 遍历字典用户名
 	for _,user := range config.Userdict["ssh"]{

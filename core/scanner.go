@@ -13,11 +13,7 @@ import (
 	"time"
 )
 
-func Scanner(flag config.EnterFlag) {
-	if flag.ScanHost == ""{
-		fmt.Println("FscanX.exe [global options] command [command options] [arguments...] HOST ")
-		return
-	}
+func Scanner(flag config.EnterFlag){
 	start := time.Now()
 	if flag.ScanType != ""{
 		fmt.Println("当前操作系统:",runtime.GOOS)
@@ -42,66 +38,26 @@ func Scanner(flag config.EnterFlag) {
 	if elapsed != 0{
 		fmt.Println("[total time]", elapsed)
 	}
-
 }
-
-func webscanner(flag config.EnterFlag){
-	fmt.Println("Load webscan")
-	fmt.Println("[config] ==> | thread",flag.Thread,"| noping",flag.NoPing,"|")
-	fmt.Println("")
-	lib.Inithttp(config.WebConfig)
-	ips, _ :=  ResolveIPS(flag.ScanHost)
-	var result []config.PortResult
-	//fmt.Println(ips)
-	var aliveip =  plugin.PingScan(flag.Thread,ips,flag.NoPing)
-	var resolveports []int
-	if flag.Ports != "" {
-		resolveports = resolvePorts(flag.Ports)
-	}else{
-		resolveports = config.WebPorts
-	}
-	result = plugin.PortScan(flag.Thread,resolveports,aliveip)
-	var wg sync.WaitGroup
-	result = plugin.PortScan(flag.Thread,resolveports,aliveip)
-	var taskchan = make(chan config.PortResult)
-	go func() {
-		for _,value := range result {
-			taskchan <- value
-		}
-		defer close(taskchan)
-	}()
-	for i:=0;i<int(flag.Thread);i++{
-		wg.Add(1)
-		go func(chan config.PortResult) {
-			for value := range taskchan{
-				webscan.WebScan(&value,flag.Fragile,int(flag.Thread))
-			}
-			defer wg.Done()
-		}(taskchan)
-	}
-	wg.Wait()
-	printalivePC(aliveip)
-
-}
-
 
 func printalivePC(ips []string) {
 	fmt.Println("---------------------------------------")
 	fmt.Println("Alive PC:",len(ips))
 	fmt.Println("Scan Finished!")
 }
+
 func hostscanner(flag config.EnterFlag){
 	fmt.Println("Load hostscan")
 	fmt.Println("[config] ==> | thread",flag.Thread,"| noping",flag.NoPing,"|")
 	fmt.Println("")
 	ips ,_ := ResolveIPS(flag.ScanHost)
-	var aliveip = plugin.PingScan(flag.Thread,ips,flag.NoPing)
+	var aliveip = plugin.PingScanNet(flag.Thread,ips,flag.NoPing)
 	for _,ip:= range aliveip{
-		fmt.Println("[+]",ip)
+		fmt.Println("[*]",ip)
 	}
 	printalivePC(aliveip)
-
 }
+
 func oxidscanner(flag config.EnterFlag){
 	fmt.Println("Load oxidscan")
 	fmt.Println("[config] ==> | thread",flag.Thread,"| noping",flag.NoPing,"|")
@@ -133,6 +89,7 @@ func oxidscanner(flag config.EnterFlag){
 	}
 	printalivePC(aliveip)
 }
+
 
 func ms17010scanner(flag config.EnterFlag){
 	fmt.Println("Load ms17010")
@@ -170,7 +127,6 @@ func ms17010scanner(flag config.EnterFlag){
 	printalivePC(aliveip)
 }
 
-
 func smbghostscanner(flag config.EnterFlag){
 	fmt.Println("Load smbghost [CVE-2020-0796]")
 	fmt.Println("[config] ==> | thread",flag.Thread,"| noping",flag.NoPing,"|")
@@ -205,9 +161,10 @@ func smbghostscanner(flag config.EnterFlag){
 	printalivePC(aliveip)
 }
 
+
 func portscanner(flag config.EnterFlag) {
 	fmt.Println("Load portscan")
-	fmt.Println("[config] ==> | Fragile",flag.Fragile,"| thread",flag.Thread,"| noping",flag.NoPing,"| netbios",flag.Netbios,"|")
+	fmt.Println("[config] ==> | Fragile",flag.Fragile,"| thread",flag.Thread,"| noping",flag.NoPing,"|")
 	// 第一步对存活主机进行探测，获取存活主机的列表
 	fmt.Println("")
 	var result []config.PortResult
@@ -223,7 +180,6 @@ func portscanner(flag config.EnterFlag) {
 	}
 	// 获取完存活主机，在进行判断，如果Fragile参数为true，则进行脆弱端口的扫描，否在就进行常规端口扫描
 	if flag.Fragile == true{
-
 		var wg sync.WaitGroup
 		result = plugin.PortScan(flag.Thread,resolveports,aliveip)
 		var taskchan = make(chan config.PortResult)
@@ -248,13 +204,6 @@ func portscanner(flag config.EnterFlag) {
 						case "3306":
 							_ = FuncCall(PluginMap,"3306",&config.HostData{HostName: value.IP,TimeOut:5,Ports:3306,SshKey:""})
 							break
-						case "139":
-							if flag.Netbios == true {
-								_ = FuncCall(PluginMap,"139",&config.HostData{HostName: value.IP,TimeOut:5,Ports:139,SshKey:"",ScanType: "netbios"})
-							}else{
-								continue
-							}
-							break
 						case "1433":
 							_ = FuncCall(PluginMap,"1433",&config.HostData{HostName: value.IP,TimeOut:5,Ports:1433,SshKey:""})
 							break
@@ -265,7 +214,7 @@ func portscanner(flag config.EnterFlag) {
 							_ = FuncCall(PluginMap,"21",&config.HostData{HostName: value.IP,TimeOut:5,Ports:21,SshKey:""})
 							break
 						case "22":
-							_ = FuncCall(PluginMap,"22",&config.HostData{HostName: value.IP,TimeOut:5,Ports:22,SshKey:flag.Sshkey,Command:""})
+							_ = FuncCall(PluginMap,"22",&config.HostData{HostName: value.IP,TimeOut:5,Ports:22,SshKey:flag.Sshkey,Command:flag.Command})
 							break
 						case "27017":
 							_ = FuncCall(PluginMap,"27017",&config.HostData{HostName: value.IP,TimeOut:5,Ports:27017,SshKey:""})
@@ -286,18 +235,52 @@ func portscanner(flag config.EnterFlag) {
 		result = plugin.PortScan(flag.Thread,resolveports,aliveip)
 		for _,key := range result {
 			for _,value := range key.Port{
-				if value == 139 && flag.Netbios == true{
-					_ = FuncCall(PluginMap,"139",&config.HostData{HostName: key.IP,TimeOut:5,Ports:139,SshKey:"",ScanType: "netbios"})
+				if value == 22 && (flag.Sshkey != "" || flag.Command != "") {
+					_ = FuncCall(PluginMap,"22",&config.HostData{HostName: key.IP,TimeOut:5,Ports:22,SshKey:flag.Sshkey,Command:flag.Command})
 				}
-				if value == 22 && flag.Sshkey != ""{
-					_ = FuncCall(PluginMap,"22",&config.HostData{HostName: key.IP,TimeOut:5,Ports:22,SshKey:flag.Sshkey,Command:"whoami"})
-				}
-				if value == 6379 && (config.RedisFile !="" || config.RedisShell!=""){
+				if value == 6379 && (config.RedisFile != "" || config.RedisShell!= ""){
 					_ = FuncCall(PluginMap,"6379",&config.HostData{HostName: key.IP,TimeOut: 5,Ports: 6379,SshKey: ""})
 				}
 			}
 			fmt.Println("[*]",key.IP,key.Port)
 		}
 	}
+	printalivePC(aliveip)
+}
+
+func webscanner(flag config.EnterFlag){
+	fmt.Println("Load webscan")
+	fmt.Println("[config] ==> | thread",flag.Thread,"| noping",flag.NoPing,"| fragile",flag.Fragile,"|")
+	fmt.Println("")
+	lib.Inithttp(config.WebConfig)
+	ips, _ :=  ResolveIPS(flag.ScanHost)
+	var result []config.PortResult
+	//fmt.Println(ips)
+	var aliveip =  plugin.PingScan(flag.Thread,ips,flag.NoPing)
+	var resolveports []int
+	if flag.Ports != "" {
+		resolveports = resolvePorts(flag.Ports)
+	}else{
+		resolveports = config.WebPorts
+	}
+	result = plugin.PortScan(flag.Thread,resolveports,aliveip)
+	var wg sync.WaitGroup
+	var taskchan = make(chan config.PortResult)
+	go func() {
+		for _,value := range result {
+			taskchan <- value
+		}
+		defer close(taskchan)
+	}()
+	for i:=0;i<int(flag.Thread);i++{
+		wg.Add(1)
+		go func(chan config.PortResult) {
+			for value := range taskchan{
+				webscan.WebScan(&value,flag.Fragile,int(flag.Thread))
+			}
+			defer wg.Done()
+		}(taskchan)
+	}
+	wg.Wait()
 	printalivePC(aliveip)
 }

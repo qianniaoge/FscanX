@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"FscanX/config"
 	"bytes"
 	"net"
 	"os/exec"
@@ -22,7 +23,7 @@ func PingScan(thread int64,hostlist []string,noping bool)[]string{
 	var wg sync.WaitGroup
 
 	var hostchan = make(chan string)
-   	// 创建信道持续向其中写入ip
+	// 创建信道持续向其中写入ip
 	go func() {
 		for _, ip := range hostlist{
 			hostchan <- ip
@@ -36,8 +37,61 @@ func PingScan(thread int64,hostlist []string,noping bool)[]string{
 			defer wg.Done()
 			for ip := range hostchan{
 				if noping == true{
-					if icmps(ip) == true {
+					err,status,_ := NETBIOS(&config.HostData{HostName: ip,Ports: 139,TimeOut: 50,ScanType: "netbios"})
+					if err != nil  && strings.Contains(err.Error(),"timeout") {
+						if icmps(ip) == true {
+							IsAlive = append(IsAlive,ip)
+						}
+					}else{
+						if status == true {
+							IsAlive = append(IsAlive,ip)
+						}else{
+							IsAlive = append(IsAlive,ip)
+						}
+					}
+				}else{
+					if execping(ip) == true {
 						IsAlive = append(IsAlive,ip)
+					}
+				}
+			}
+		}(hostchan)
+	}
+	wg.Wait()
+	//fmt.Println(IsAlive)
+	return IsAlive
+}
+
+
+func PingScanNet(thread int64,hostlist []string,noping bool)[]string{
+	var wg sync.WaitGroup
+
+	var hostchan = make(chan string)
+	// 创建信道持续向其中写入ip
+	go func() {
+		for _, ip := range hostlist{
+			hostchan <- ip
+		}
+		defer close(hostchan)
+	}()
+	// 采用并发的方式来读取ip，之后进行icmp的扫描
+	for i:=0;i<int(thread);i++{
+		wg.Add(1)
+		go func(hostchan chan string) {
+			defer wg.Done()
+			for ip := range hostchan{
+				if noping == true{
+					err,status,msg := NETBIOS(&config.HostData{HostName: ip,Ports: 139,TimeOut: 50,ScanType: "netbios"})
+					if err != nil  && strings.Contains(err.Error(),"timeout") {
+						if icmps(ip) == true {
+							IsAlive = append(IsAlive,ip)
+						}
+					}else{
+						if status == true {
+							IsAlive = append(IsAlive,msg)
+						}else{
+							IsAlive = append(IsAlive,ip)
+						}
 					}
 				}else{
 					if execping(ip) == true {
@@ -76,15 +130,15 @@ func execping(host string) bool{
 		if err != nil {
 			return false
 		}
-	if err = cmd.Wait(); err != nil {
-		return false
-	}else{
-		if strings.Contains(outinfo.String(),"true"){
-			return true
-		}else{
+		if err = cmd.Wait(); err != nil {
 			return false
+		}else{
+			if strings.Contains(outinfo.String(),"true"){
+				return true
+			}else{
+				return false
+			}
 		}
-	}
 	}else{
 		return false
 	}
@@ -93,14 +147,14 @@ func execping(host string) bool{
 // 利用icmp协议来判断主机是否存货
 
 func icmps(host string) (bool) {
-	conn, err := net.DialTimeout("ip4:icmp",host,3*time.Second)
+	conn, err := net.DialTimeout("ip4:icmp",host,1*time.Second)
 	if err != nil {
 		return false
 	}
 	defer func() {
 		_ = conn.Close()
 	}()
-	if err := conn.SetDeadline(time.Now().Add(3*time.Second)); err != nil {
+	if err := conn.SetDeadline(time.Now().Add(1*time.Second)); err != nil {
 		return false
 	}
 	msg := packet(host)

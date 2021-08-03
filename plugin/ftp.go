@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func FtpScan(info *config.HostData)(tmperr error){
+func FTPSCAN(info *config.HostData)(tmperr error){
 	var starttime = time.Now().Unix()
 	// 遍历字典用户名
 	for _,user := range config.Userdict["ftp"]{
