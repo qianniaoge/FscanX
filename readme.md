@@ -39,6 +39,13 @@
 <br> 感谢：https://github.com/shadow1ng/fscan
 <br> 感谢：https://github.com/k8gege/LadonGo
 
+<br> 2021-8-6 更新:
+<br> 修复ms17010切片长度校验
+<br> 增强实战利用，增加tcp格式基于445，139，135，22端口的存活主机扫描（原因是该些端口为windows主机默认开放端口和Linux主机运维常用端口）
+<br> 修改hoscan命令行格式，增加子命令，将icmp协议扫描，ping扫描，netbios扫描，tcp扫描细分，应对不同的内网环境
+<br> 对netbios扫描输出格式进行处理，增加了QSDN的输出（完全主机名），来提高zerologon后续的方便使用
+<br> 增加了netbios的域控识别功能
+
 <br> 2021-8-5 出现问题：
 <br>在使用ms17010扫描时，未对切片长度进行校验，造成了切片范围错误（目前已经完善，但未发布版本）
 <br>实战中不足:走socks5代理扫描时，只有netbios能够扫描到，而icmp无法通过socks5，目前正在思考解决办法
