@@ -12,9 +12,10 @@
 ```shell
     FscanX.exe ms17010 192.168.1.1/24
 ```
+![img.png](image/img6.png)
 <br>3. ICMP / ping 存活主机探测
 ```shell
-    FscanX.exe hostscan --noping --thread 60 192.168.1.1/24
+    FscanX.exe hostscan icmp --thread 60 192.168.1.1/24
 ```
 ![img.png](image/img1.png)
 <br>4. TCP 端口扫描（支持脆弱端口的漏洞检测）
@@ -32,6 +33,12 @@
     FscanX.exe oxidscan 192.168.1.1/24
 ```
 ![img.png](image/img.png)
+<br>7.netbios 输出主机详细信息
+```shell
+    FscanX.exe hostscan netbios 192.168.1.1/24
+```
+![img.png](image/img5.png)
+
 <br> 上述为一些使用例子，详细可使用-h或--help查看帮助
 <br> 视频演示：（演示系统Linux 采用upx编译FscanX_amd64）
 [![asciicast](https://asciinema.org/a/428622.svg)](https://asciinema.org/a/428622)
