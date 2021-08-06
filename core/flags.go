@@ -96,27 +96,75 @@ func GetFlags(){
 			{
 				Name:"hostscan",
 				Usage: "The scan finds the surviving host and outputs details",
-				Flags: []cli.Flag{
-					&cli.IntFlag{
-						Name: "thread",
-						Value: 50,
-						Usage: "set gorouite for fscanX",
+				Subcommands: []*cli.Command{
+					{
+						Name: "tcp",
+						Usage: "Using the 135,139,445,22 port to discover hosts",
+						Flags: []cli.Flag{
+							&cli.IntFlag{
+								Name: "thread",
+								Value: 100,
+								Usage: "set gorouite for fscanX",
+							},
+						},
+						Action: func(c *cli.Context) error {
+							enter.Method = "tcp"
+							enter.Thread = reflect.ValueOf(c.Value("thread")).Int()
+							if reg.MatchString(c.Args().Get(0)) == true{
+								enter.ScanHost = c.Args().Get(0)
+							}
+							enter.ScanType = "hostscan"
+							return nil
+						},
+					},
+
+					{
+						Name: "netbios",
+						Usage: "Using NetBIOS protocol to discover hosts",
+						Flags: []cli.Flag{
+							&cli.IntFlag{
+								Name: "thread",
+								Value: 100,
+								Usage: "set gorouite for fscanX",
+							},
+						},
+						Action: func(c *cli.Context) error {
+							enter.Method = "netbios"
+							enter.Thread = reflect.ValueOf(c.Value("thread")).Int()
+							if reg.MatchString(c.Args().Get(0)) == true{
+								enter.ScanHost = c.Args().Get(0)
+							}
+							enter.ScanType = "hostscan"
+							return nil
+						},
 
 					},
-					&cli.BoolFlag{
-						Name: "noping",
-						Value: false,
-						Usage: "whether to use ping command",
+					{
+						Name: "icmp",
+						Usage: "Using ICMP Method to discover hosts default use ping command",
+						Flags: []cli.Flag{
+							&cli.IntFlag{
+								Name: "thread",
+								Value: 100,
+								Usage: "set gorouite for fscanX",
+							},
+							&cli.BoolFlag{
+								Name: "noping",
+								Value: false,
+								Usage: "Using ICMP protocol to discover hosts",
+							},
+						},
+						Action: func(c *cli.Context) error {
+							enter.Method = "icmp"
+							enter.Thread = reflect.ValueOf(c.Value("thread")).Int()
+							enter.NoPing = reflect.ValueOf(c.Value("noping")).Bool()
+							if reg.MatchString(c.Args().Get(0)) == true{
+								enter.ScanHost = c.Args().Get(0)
+							}
+							enter.ScanType = "hostscan"
+							return nil
+						},
 					},
-				},
-				Action: func(c *cli.Context) error {
-					enter.NoPing = reflect.ValueOf(c.Value("noping")).Bool()
-					enter.Thread = reflect.ValueOf(c.Value("thread")).Int()
-					if reg.MatchString(c.Args().Get(0)) == true{
-						enter.ScanHost = c.Args().Get(0)
-					}
-					enter.ScanType = "hostscan"
-					return nil
 				},
 			},
 			{

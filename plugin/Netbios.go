@@ -10,19 +10,6 @@ import (
 	"time"
 )
 var (
-	UNIQUE_NAMES = map[string]string{
-		"\x00": "Workstation Service",
-		"\x03": "Messenger Service",
-		"\x06": "RAS Server Service",
-		"\x1F": "NetDDE Service",
-		"\x20": "Server Service",
-		"\x21": "RAS Client Service",
-		"\xBE": "Network Monitor Agent",
-		"\xBF": "Network Monitor Application",
-		"\x1D": "Master Browser",
-		"\x1B": "Domain Master Browser",
-	}
-
 	GROUP_NAMES = map[string]string{
 		"\x00": "Domain Name",
 		"\x1C": "Domain Controllers",
@@ -43,17 +30,21 @@ type NbnsName struct {
 	unique    string
 	group     string
 	msg       string
-	osversion string
+	osversion string // 操作系统版本
+	qsdn string // 主机qsdn名
 }
 
 func NETBIOS(info *config.HostData)(error,bool,string){
 	nbname, err := netbios1(info)
+
 	var msg, isdc string
 
 	if strings.Contains(nbname.msg, "Domain Controllers") {
-		isdc = "[+]DC"
+		isdc = "[netbios-DC]"
+	}else{
+		isdc = "[netbios]"
 	}
-	msg += fmt.Sprintf("%-15s%-5s %s\\%-15s   %s", info.HostName, isdc, nbname.group, nbname.unique, nbname.osversion)
+	msg += fmt.Sprintf("%s \n=>NAME:%s %s\\%s \n=> QSDN:[%s]\n=> OS:[%s]",isdc,info.HostName, nbname.group, nbname.unique,nbname.qsdn,nbname.osversion)
 
 	if info.ScanType == "netbios" {
 		//msg += "\n-------------------------------------------\n" + nbname.msg
@@ -66,6 +57,8 @@ func NETBIOS(info *config.HostData)(error,bool,string){
 
 func netbios1(info *config.HostData)(nbname NbnsName,err error){
 	nbname, err = GetNbnsname(info)
+	//fmt.Println(nbname)
+	//fmt.Println(nbname.msg)
 	var payload0 []byte
 	if err == nil {
 		name := netbiosEncode(nbname.unique)
@@ -74,11 +67,11 @@ func netbios1(info *config.HostData)(nbname NbnsName,err error){
 		payload0 = append(payload0, []byte("\x00 EOENEBFACACACACACACACACACACACACA\x00")...)
 	}
 	realhost := fmt.Sprintf("%s:%v", info.HostName, info.Ports)
-	conn, err := net.DialTimeout("tcp", realhost, time.Duration(info.TimeOut)*time.Millisecond)
+	conn, err := net.DialTimeout("tcp", realhost, time.Duration(1)*time.Second)
 	if err != nil {
 		return
 	}
-	err = conn.SetDeadline(time.Now().Add(time.Duration(info.TimeOut) * time.Millisecond))
+	err = conn.SetDeadline(time.Now().Add(time.Duration(1) * time.Second))
 	if err != nil {
 		return
 	}
@@ -131,13 +124,14 @@ func netbios1(info *config.HostData)(nbname NbnsName,err error){
 	tmp1 := bytes.ReplaceAll(os_version, []byte{0x00, 0x00}, []byte{124})
 	tmp1 = bytes.ReplaceAll(tmp1, []byte{0x00}, []byte{})
 	msg1 := string(tmp1[:len(tmp1)-1])
-	nbname.osversion = msg1
+	nbname.osversion = msg1 //这里为 Windows Server 2012 R2 Standard Evaluation 9600|Windows Server 2012 R2 Standard Evaluation 6.3
+
 	index1 := strings.Index(msg1, "|")
 	if index1 > 0 {
-		nbname.osversion = nbname.osversion[:index1]
+		nbname.osversion = nbname.osversion[:index1] // 这里为 Windows Server 2012 R2 Standard Evaluation 9600
 	}
-	//nbname.msg += "-------------------------------------------\n"
-	//nbname.msg += msg1 + "\n"
+	nbname.msg += msg1 // 这里为 Windows Server 2012 R2 Standard Evaluation 9600|Windows Server 2012 R2 Standard Evaluation 6.3
+
 	start := bytes.Index(ret, []byte("NTLMSSP"))
 	if len(ret) < start+45 {
 		return
@@ -177,9 +171,16 @@ func netbios1(info *config.HostData)(nbname NbnsName,err error){
 			//Time stamp, 暂时不想处理
 		} else if NetBIOS_ITEM_TYPE[string(item_type)] != "" {
 			nbname.msg += fmt.Sprintf("%-22s: %s\n", NetBIOS_ITEM_TYPE[string(item_type)], string(item_content))
+			// 这里输出QSDN名方便后续的zerlogon的攻击测试
+
+			if NetBIOS_ITEM_TYPE[string(item_type)] == "DNS computer name"{
+				nbname.qsdn = string(item_content)
+			}
+
 		} else if string(item_type) == "\x00\x00" {
 			break
 		} else {
+			// 未知的类型
 			nbname.msg += fmt.Sprintf("Unknown: %s\n", string(item_content))
 		}
 	}
@@ -188,11 +189,12 @@ func netbios1(info *config.HostData)(nbname NbnsName,err error){
 func GetNbnsname(info *config.HostData) (nbname NbnsName, err error) {
 	senddata1 := []byte{102, 102, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 32, 67, 75, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 0, 0, 33, 0, 1}
 	realhost := fmt.Sprintf("%s:%v", info.HostName, 137)
-	conn, err := net.DialTimeout("udp", realhost, time.Duration(info.TimeOut)*time.Millisecond)
+	// 采用udp连接
+	conn, err := net.DialTimeout("udp", realhost, time.Duration(1)*time.Second) //连接1秒增加准确性
 	if err != nil {
 		return
 	}
-	err = conn.SetDeadline(time.Now().Add(time.Duration(info.TimeOut) * time.Millisecond))
+	err = conn.SetDeadline(time.Now().Add(time.Duration(1) * time.Second))
 	if err != nil {
 		return
 	}
@@ -220,21 +222,16 @@ func GetNbnsname(info *config.HostData) (nbname NbnsName, err error) {
 		}
 		name := string(data[18*i : 18*i+15])
 		flag_bit := data[18*i+15 : 18*i+16]
-		if GROUP_NAMES[string(flag_bit)] != "" && string(flag_bit) != "\x00" {
-			//msg += fmt.Sprintf("%s G %s\n", name, GROUP_NAMES[string(flag_bit)])
-		} else if UNIQUE_NAMES[string(flag_bit)] != "" && string(flag_bit) != "\x00" {
-			//msg += fmt.Sprintf("%s U %s\n", name, UNIQUE_NAMES[string(flag_bit)])
-		} else if string(flag_bit) == "\x00" || len(data) >= 18*i+18 {
-			name_flags := data[18*i+16 : 18*i+18][0]
-			if name_flags >= 128 {
+
+		if GROUP_NAMES[string(flag_bit)] != "" && string(flag_bit) != "\x00" && GROUP_NAMES[string(flag_bit)] == "Domain Controllers"{
+			msg += "Domain Controllers"
+		}
+		if string(flag_bit) == "\x00" || len(data) >= 18*i+18 {
+			if data[18*i+16 : 18*i+18][0] >= 128 {
 				nbname.group = strings.Replace(name, " ", "", -1)
-				//msg += fmt.Sprintf("%s G %s\n", name, GROUP_NAMES[string(flag_bit)])
 			} else {
 				nbname.unique = strings.Replace(name, " ", "", -1)
-				//msg += fmt.Sprintf("%s U %s\n", name, UNIQUE_NAMES[string(flag_bit)])
 			}
-		} else {
-			//msg += fmt.Sprintf("%s \n", name)
 		}
 	}
 	nbname.msg += msg

@@ -16,8 +16,8 @@ import (
 func Scanner(flag config.EnterFlag){
 	start := time.Now()
 	if flag.ScanType != ""{
-		fmt.Println("当前操作系统:",runtime.GOOS)
-		fmt.Println("进程信息:", os.Args[0],os.Getpid())
+		fmt.Println("OS Name:",runtime.GOOS)
+		fmt.Println("PID:",os.Getpid(),"FscanX")
 		fmt.Println("")
 	}
 	switch flag.ScanType {
@@ -41,19 +41,19 @@ func Scanner(flag config.EnterFlag){
 }
 
 func printalivePC(ips []string) {
-	fmt.Println("---------------------------------------")
+	fmt.Println("=========================================")
 	fmt.Println("Alive PC:",len(ips))
 	fmt.Println("Scan Finished!")
 }
 
 func hostscanner(flag config.EnterFlag){
 	fmt.Println("Load hostscan")
-	fmt.Println("[config] ==> | thread",flag.Thread,"| noping",flag.NoPing,"|")
+	fmt.Println("[config] ==> | thread",flag.Thread,"| method",flag.Method,"|")
 	fmt.Println("")
 	ips ,_ := ResolveIPS(flag.ScanHost)
-	var aliveip = plugin.PingScanNet(flag.Thread,ips,flag.NoPing)
+	var aliveip = plugin.PingScanNet(flag.Thread,ips,flag.Method,flag.NoPing)
 	for _,ip:= range aliveip{
-		fmt.Println("[*]",ip)
+		fmt.Println(ip)
 	}
 	printalivePC(aliveip)
 }
@@ -71,7 +71,7 @@ func oxidscanner(flag config.EnterFlag){
 		var wg sync.WaitGroup
 		var taskchan = make(chan string)
 		go func() {
-			for _, ip := range aliveip {
+			for _, ip := range ips {
 				taskchan <- ip
 			}
 			defer close(taskchan)
@@ -114,7 +114,7 @@ func ms17010scanner(flag config.EnterFlag){
 			go func(taskchan chan string) {
 				defer wg.Done()
 				for ip := range taskchan{
-					var info  = config.HostData{HostName: ip,TimeOut: 5}
+					var info  = config.HostData{HostName: ip,TimeOut: 5,Ports: 445}
 					err := plugin.MS17070(&info)
 					if err != nil {
 						fmt.Println("[*]",info.HostName)

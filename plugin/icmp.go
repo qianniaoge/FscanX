@@ -63,7 +63,7 @@ func PingScan(thread int64,hostlist []string,noping bool)[]string{
 }
 
 
-func PingScanNet(thread int64,hostlist []string,noping bool)[]string{
+func PingScanNet(thread int64,hostlist []string,scantype string,noping bool)[]string{
 	var wg sync.WaitGroup
 
 	var hostchan = make(chan string)
@@ -80,24 +80,61 @@ func PingScanNet(thread int64,hostlist []string,noping bool)[]string{
 		go func(hostchan chan string) {
 			defer wg.Done()
 			for ip := range hostchan{
-				if noping == true{
+				/*if netbios == true{
+					err,status,msg := NETBIOS(&config.HostData{HostName: ip,Ports: 139, ScanType: "netbios"})
+					if err == nil{
+						if status == true {
+							IsAlive = append(IsAlive,msg)
+						}
+					}
+				}*/
+				switch scantype {
+				case "tcp":
+					if TCPSALIVE(ip) == true{
+						IsAlive = append(IsAlive, "[*] "+ip)
+					}
+					break
+				case "netbios":
+					err,status,msg := NETBIOS(&config.HostData{HostName: ip,Ports: 139, ScanType: "netbios"})
+					if err == nil{
+						if status == true {
+							IsAlive = append(IsAlive,msg)
+						}
+					}
+					break
+				case "icmp":
+					if noping == true{
+						if icmps(ip) == true {
+							IsAlive = append(IsAlive,"[ICMP] "+ip)
+						}
+					}else{
+						if execping(ip) == true {
+							IsAlive = append(IsAlive,"[PING] "+ip)
+						}
+					}
+					break
+				default:
+					break
+				}
+
+				/*if noping == true{
 					err,status,msg := NETBIOS(&config.HostData{HostName: ip,Ports: 139,TimeOut: 50,ScanType: "netbios"})
 					if err != nil  && strings.Contains(err.Error(),"timeout") {
 						if icmps(ip) == true {
-							IsAlive = append(IsAlive,ip)
+							IsAlive = append(IsAlive,"[*] "+ip)
 						}
 					}else{
 						if status == true {
 							IsAlive = append(IsAlive,msg)
 						}else{
-							IsAlive = append(IsAlive,ip)
+							IsAlive = append(IsAlive,"[*] "+ip)
 						}
 					}
 				}else{
 					if execping(ip) == true {
-						IsAlive = append(IsAlive,ip)
+						IsAlive = append(IsAlive,"[*] "+ip)
 					}
-				}
+				}*/
 			}
 		}(hostchan)
 	}

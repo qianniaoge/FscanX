@@ -63,7 +63,7 @@ func ms17070Scan(info *config.HostData) error {
 			fmt.Println("[-]", info.HostName + ":445", "ms17010 invalid session setup AndX response")
 		}else{
 			for i:= 0;i<len(sessionSetupResponse)-1;i++{
-				if sessionSetupResponse[i] == 0 && sessionSetupResponse[i+1] == 0 {
+				if sessionSetupResponse[i] == 0 && sessionSetupResponse[i+1] == 0 && i > 10 {
 					os = string(sessionSetupResponse[10:i])
 					os = strings.Replace(os, string([]byte{0x00}), "", -1)
 					break
@@ -97,9 +97,7 @@ func ms17070Scan(info *config.HostData) error {
 		return err
 	}
 	if reply[9] == 0x05 && reply[10] == 0x02 && reply[11] == 0x00 && reply[12] == 0xc0 {
-		//fmt.Printf("%s\tMS17-010\t(%s)\n", ip, os)
-		//if runtime.GOOS=="windows" {fmt.Printf("%s\tMS17-010\t(%s)\n", ip, os)
-		//} else{fmt.Printf("\033[33m%s\tMS17-010\t(%s)\033[0m\n", ip, os)}
+
 		result := fmt.Sprintf("[+] %s\tMS17-010\t(%s)", info.HostName, os)
 		fmt.Println(result)
 		// detect present of DOUBLEPULSAR SMB implant
@@ -121,7 +119,7 @@ func ms17070Scan(info *config.HostData) error {
 			fmt.Println(result)
 		}
 	} else {
-		result := fmt.Sprintf("[*] %s  (%s)", info.HostName, os)
+		result := fmt.Sprintf("[+] %s(%s)", info.HostName, os)
 		fmt.Println(result)
 	}
 	return nil

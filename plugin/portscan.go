@@ -68,7 +68,7 @@ func toscanports(thread int64,ports []int,ip string)[]int{
 
 func portconnect(ip string,port int) bool {
 	host,scan := ip,port
-	conn, err := net.DialTimeout("tcp4",fmt.Sprintf("%s:%v",host,scan),time.Duration(2)*time.Second)
+	conn, err := net.DialTimeout("tcp4",fmt.Sprintf("%s:%v",host,scan),time.Duration(1)*time.Second)
 	if err == nil {
 		_ = conn.Close()
 		return true
