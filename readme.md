@@ -45,6 +45,14 @@
 <br> 最后：
 <br> 感谢：https://github.com/shadow1ng/fscan
 <br> 感谢：https://github.com/k8gege/LadonGo
+<br> 2021-8-10 更新计划：
+<br> 目前在实战中发现了FscanX的不足指出，并正在改进，改进计划如下
+<br> 1.在之前版本中存在部分问题，入redis写入失败，ssh id_rsa公私钥连接ssh问题，正在修复
+<br> 2.解决netbios在实战中出现的扫描问题，不能正确扫描，且存在部分输出问题
+<br> 3.增加脆弱服务的直接利用，入mssql的xp_cmdshell,sp_oacreate,clr利用，redis的未授权利用，ssh的命令执行
+<br> 4.增加日志功能，便于webshell当中的使用
+<br> 5.解决icmp被防火墙绊掉，端口扫描的问题
+<br> 6.增加多协议扫描存活主机
 
 <br> 2021-8-6 更新:
 <br> 修复ms17010切片长度校验
