@@ -7,10 +7,10 @@
 <h4 align="center">golang 语言编写的内网综合利用扫描器</h4>
 
 <p align="center">
-  <a href="#credits">介绍</a> •
-  <a href="#key-features">实现功能</a></a> •
-  <a href="#how-to-use">怎样使用</a> •
-  <a href="#download">下载</a> •
+  <a href="#介绍">介绍</a> •
+  <a href="#实现功能">实现功能</a></a> •
+  <a href="#怎样使用">怎样使用</a> •
+  <a href="#下载">下载</a> •
   
 </p>
 
