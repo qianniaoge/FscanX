@@ -3,8 +3,10 @@ package webscan
 import (
 	"FscanX/config"
 	"FscanX/webscan/lib"
+	"crypto/rand"
 	"embed"
 	"fmt"
+	"math/big"
 	"net/http"
 	"strings"
 )
@@ -26,6 +28,10 @@ func WebScanPOC(info *httpdata) {
 	}
 }
 
+func RandUA()string{
+	result,_ := rand.Int(rand.Reader,big.NewInt(int64(len(config.DefaultUA))))
+	return config.DefaultUA[result.Int64()]
+}
 func Execute(PocInfo config.WebInfo,thread int) {
 	req, err := http.NewRequest("GET", PocInfo.Target, nil)
 	if err != nil {
@@ -33,7 +39,7 @@ func Execute(PocInfo config.WebInfo,thread int) {
 		_ = errlog
 		return
 	}
-	req.Header.Set("User-agent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36")
+	req.Header.Set("User-agent", RandUA())
 	if PocInfo.SetCookie != "" {
 		req.Header.Set("Cookie", PocInfo.SetCookie)
 	}

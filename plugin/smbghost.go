@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -85,36 +86,39 @@ const (
 		"\x00\x00\x00\x00"
 )
 
-func SMBGHOST(info *config.HostData) error {
-	var err = smbghostScan(info)
-	if err != nil {
-		return err
+func SMBGHOST(info *config.HostData){
+	err , result := smbghostScan(info)
+	if err != nil && !strings.Contains(err.Error(),"timeout"){
+		config.WriteLogFile(config.LogFile,fmt.Sprintf("[*] %s",info.HostName),config.Inlog)
 	}
-	return nil
+	if result != ""{
+		config.WriteLogFile(config.LogFile,result,config.Inlog)
+	}
 }
 
-func smbghostScan(info *config.HostData) error {
+func smbghostScan(info *config.HostData) (err error,result string) {
 	var addr = fmt.Sprintf("%s:%v",info.HostName,445)
-	conn, err := net.DialTimeout("tcp",addr,time.Duration(info.TimeOut)*time.Second)
+	conn, err := net.DialTimeout("tcp",addr,time.Duration(1)*time.Second)
 	if err != nil {
-		return err
+		return err,result
 	}
 	_, err = conn.Write([]byte(pkt))
 	if err != nil {
-		return err
+		return err,result
 	}
 	var buf = make([]byte,1024)
-	err = conn.SetReadDeadline(time.Now().Add(time.Duration(info.TimeOut)*time.Second))
+	err = conn.SetReadDeadline(time.Now().Add(time.Duration(1)*time.Second))
 	n, err := conn.Read(buf)
 	if err != nil {
-		return err
+		return err,result
 	}
 	defer func(){
 		_ = conn.Close()
 	}()
 	if bytes.Contains(buf[:n],[]byte("Public")){
-		result := fmt.Sprintf("[+] %s [CVE-2020-0796]",info.HostName)
-		fmt.Println(result)
+		result = fmt.Sprintf("[+] %s [CVE-2020-0796]",info.HostName)
+	}else{
+		result = fmt.Sprintf("[*] %s",info.HostName)
 	}
-	return nil
+	return nil,result
 }

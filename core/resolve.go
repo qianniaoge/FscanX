@@ -140,11 +140,11 @@ func ResolvePORTS(ports string)([]int, error){
 			scanports = append(scanports,i)
 		}
 	}
-	scanports = removeDuplicate(scanports)
+	scanports = RemoveDuplicate(scanports)
 	return scanports,nil
 }
 
-func removeDuplicate(old []int) []int {
+func RemoveDuplicate(old []int) []int {
 	result := make([]int, 0, len(old))
 	temp := map[int]struct{}{}
 	for _, item := range old {
@@ -185,6 +185,6 @@ func resolvePorts(ports string)[]int{
 			scanPorts = append(scanPorts, i)
 		}
 	}
-	scanPorts = removeDuplicate(scanPorts)
+	scanPorts = RemoveDuplicate(scanPorts)
 	return scanPorts
 }

@@ -56,7 +56,7 @@ func FtpConn(info *config.HostData, user string, pass string) (flag bool, err er
 					}
 				}
 			}
-			fmt.Println(result)
+			config.WriteLogFile(config.LogFile,result,config.Inlog)
 		}
 	}
 	return flag, err

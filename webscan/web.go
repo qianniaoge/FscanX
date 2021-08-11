@@ -32,6 +32,7 @@ type CheckDatas struct {
 
 func WebScan(result *config.PortResult,fragile bool,thread int){
 	for _,value := range result.Port{
+		//fmt.Println(value,result.IP)
 		_ = webtitle(&httpdata{Host: result.IP,Ports: value,Thread: thread},fragile)
 	}
 }
@@ -198,7 +199,8 @@ func geturl(info *httpdata, flag int, CheckData []CheckDatas) (error, string, []
 					title = "None"
 				}
 				result := fmt.Sprintf("[*] %s code:%-3v title:%v", Url, resp.StatusCode, title)
-				fmt.Println(result)
+				//fmt.Println(result)
+				config.WriteLogFile(config.LogFile,result,config.Inlog)
 			}
 			CheckData = append(CheckData, CheckDatas{body, fmt.Sprintf("%s", resp.Header)})
 			redirURL, err1 := resp.Location()

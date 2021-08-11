@@ -4,6 +4,7 @@ package lib
 
 
 import (
+	"FscanX/config"
 	"embed"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
@@ -408,7 +409,8 @@ func loadPoc(fileName string, Pocs embed.FS) (*Poc, error) {
 func SelectPoc(Pocs embed.FS, pocname string) []string {
 	entries, err := Pocs.ReadDir("pocs")
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
+		config.WriteLogFile(config.LogFile,err.Error(),config.Inlog)
 	}
 	var foundFiles []string
 	for _, entry := range entries {

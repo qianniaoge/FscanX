@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+
+
+func SSHEXTENDSHELL(info *config.HostData){
+	_, err  := sshConn(info,config.SSHFLAG.UserName,config.SSHFLAG.PassWord)
+	if err != nil {
+		//fmt.Println("[-]",err)
+		config.WriteLogFile(config.LogFile,"[-] "+err.Error(),config.Inlog)
+
+	}
+}
+
 func SSHSCAN(info *config.HostData)(tmperr error) {
 	var starttime = time.Now().Unix()
 	// 遍历字典用户名
@@ -51,7 +62,7 @@ func sshConn(info *config.HostData, user string, pass string) (flag bool, err er
 		Auth = []ssh.AuthMethod{ssh.Password(Password)}
 	}
 
-	config := &ssh.ClientConfig{
+	configs := &ssh.ClientConfig{
 		User:    Username,
 		Auth:    Auth,
 		Timeout: time.Duration(info.TimeOut) * time.Second,
@@ -59,8 +70,7 @@ func sshConn(info *config.HostData, user string, pass string) (flag bool, err er
 			return nil
 		},
 	}
-
-	client, err := ssh.Dial("tcp", fmt.Sprintf("%v:%v", Host, Port), config)
+	client, err := ssh.Dial("tcp", fmt.Sprintf("%v:%v", Host, Port), configs)
 	if err == nil {
 		defer client.Close()
 		session, err := client.NewSession()
@@ -70,17 +80,19 @@ func sshConn(info *config.HostData, user string, pass string) (flag bool, err er
 			var result string
 			if info.Command != "" {
 				combo, _ := session.CombinedOutput(info.Command)
-				result = fmt.Sprintf("[+] %v:%v [SSH] %v %v \n %v", Host, Port, Username, Password, string(combo))
+				result = fmt.Sprintf("[+] %v:%v [SSH] %v %v \n%s", Host, Port, Username, Password, strings.TrimSpace(string(combo)))
 				if info.SshKey != "" {
-					result = fmt.Sprintf("[+] %v:%v [SSH] sshkey correct \n %v", Host, Port, string(combo))
+					result = fmt.Sprintf("[+] %v:%v [SSH] sshkey correct \n%v", Host, Port, string(combo))
 				}
-				fmt.Println(result)
+				//fmt.Println(result)
+				config.WriteLogFile(config.LogFile,result,config.Inlog)
 			} else {
 				result = fmt.Sprintf("[+] %v:%v [SSH] %v %v", Host, Port, Username, Password)
 				if info.SshKey != "" {
 					result = fmt.Sprintf("[+] %v:%v [SSH] sshkey correct", Host, Port)
 				}
-				fmt.Println(result)
+				//fmt.Println(result)
+				config.WriteLogFile(config.LogFile,result,config.Inlog)
 			}
 		}
 	}

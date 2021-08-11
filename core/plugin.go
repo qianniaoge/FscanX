@@ -2,8 +2,6 @@ package core
 
 import "FscanX/plugin"
 
-// 插件类型
-
 var PluginMap = map[string]interface{}{
 	"21":plugin.FTPSCAN,
 	"22":plugin.SSHSCAN,

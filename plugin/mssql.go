@@ -45,7 +45,7 @@ func mssqlConn(info *config.HostData, user string, pass string) (flag bool, err 
 		err = db.Ping()
 		if err == nil {
 			result := fmt.Sprintf("[+] %v:%v [mssql]:%v %v", Host, Port, Username, Password)
-			fmt.Println(result)
+			config.WriteLogFile(config.LogFile,result,config.Inlog)
 			flag = true
 		}
 	}

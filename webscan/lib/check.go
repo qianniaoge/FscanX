@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"FscanX/config"
 	"FscanX/webscan/lib/info"
 	"embed"
 	"fmt"
@@ -16,8 +17,8 @@ import (
 )
 
 var (
-	ceyeApi    = "a78a1cb49d91fe09e01876078d1868b2"
-	ceyeDomain = "7wtusr.ceye.io"
+	ceyeApi    = "701bba7e6735843777212d526edf5f1f"
+	ceyeDomain = "ek9k64.ceye.io"
 )
 
 type Task struct {
@@ -34,7 +35,8 @@ func CheckMultiPoc(req *http.Request, Pocs embed.FS, workers int, pocname string
 				isVul, _ := executePoc(task.Req, task.Poc)
 				if isVul {
 					result := fmt.Sprintf("[+] %s %s", task.Req.URL, task.Poc.Name)
-					fmt.Println(result)
+					config.WriteLogFile(config.LogFile,result,config.Inlog)
+					//fmt.Println(result)
 				}
 				wg.Done()
 			}
@@ -477,7 +479,8 @@ func clusterpoc1(oReq *http.Request, p *Poc, variableMap map[string]interface{},
 				}
 
 				if success == true {
-					fmt.Println(fmt.Sprintf("[+] %s://%s%s %s", req.Url.Scheme, req.Url.Host, req.Url.Path, var1))
+					//fmt.Println(fmt.Sprintf("[+] %s://%s%s %s", req.Url.Scheme, req.Url.Host, req.Url.Path, var1))
+					config.WriteLogFile(config.LogFile,fmt.Sprintf("[+] %s://%s%s %s", req.Url.Scheme, req.Url.Host, req.Url.Path, var1),config.Inlog)
 					break look1
 				}
 			}
@@ -516,7 +519,8 @@ func clusterpoc1(oReq *http.Request, p *Poc, variableMap map[string]interface{},
 						return false, err
 					}
 					if success == true {
-						fmt.Println(fmt.Sprintf("[+] %s://%s%s %s %s", req.Url.Scheme, req.Url.Host, req.Url.Path, var1, var2))
+						//fmt.Println(fmt.Sprintf("[+] %s://%s%s %s %s", req.Url.Scheme, req.Url.Host, req.Url.Path, var1, var2))
+						config.WriteLogFile(config.LogFile,fmt.Sprintf("[+] %s://%s%s %s %s", req.Url.Scheme, req.Url.Host, req.Url.Path, var1, var2),config.Inlog)
 						break look2
 					}
 				}

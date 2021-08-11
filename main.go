@@ -1,7 +1,9 @@
 package main
 
-import "FscanX/core"
+import (
+	"FscanX/core"
+)
 
 func main(){
-	core.GetFlags()
+	core.GetFlag()
 }

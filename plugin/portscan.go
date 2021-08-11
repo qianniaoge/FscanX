@@ -27,7 +27,9 @@ func PortScan(thread int64,ports []int,iplist []string)[]config.PortResult{
 				defer wg.Done()
 				for ip := range hostschan{
 					var portlist = toscanports(thread,ports,ip) // 对每一个IP都进行端口扫描
-					result = append(result,config.PortResult{ip,portlist})
+					if len(portlist) > 0 {
+						result = append(result,config.PortResult{ip,portlist})
+					}
 				}
 			}(hostchan)
 

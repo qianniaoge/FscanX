@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func MongodbScan(info *config.HostData)(error){
+func MONGODBSCAN(info *config.HostData)(error){
 	_, err := mongodbUnauth(info)
 	if err != nil {
 		errlog := fmt.Sprintf("[-] Mongodb %v:%v %v", info.HostName, info.Ports, err)
@@ -55,7 +55,7 @@ func mongodbUnauth(info *config.HostData) (flag bool, err error) {
 		if strings.Contains(text, "totalLinesWritten") {
 			flag = true
 			result := fmt.Sprintf("[+] %v  [Mongodb unauthorized]", realhost)
-			fmt.Println(result)
+			config.WriteLogFile(config.LogFile,result,config.Inlog)
 		}
 	}
 	return flag, err

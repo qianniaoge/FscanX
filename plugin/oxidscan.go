@@ -18,8 +18,10 @@ var (
 
 func OXIDSCAN(info *config.HostData) error {
 	err := FindnetScan(info)
-	if err!=nil {
-		fmt.Println("[*] ",info.HostName)
+	if err != nil && !strings.Contains(err.Error(),"timeout"){
+		//fmt.Println(err)
+		config.WriteLogFile(config.LogFile,fmt.Sprintf("[*] %s",info.HostName),config.Inlog)
+		//fmt.Println("[*] ",info.HostName)
 	}
 	return err
 }
@@ -79,6 +81,6 @@ func read(text []byte, host string) error {
 		}
 		result += "\n    [*]->[OXID] " + string(host)
 	}
-	fmt.Println(result)
+	config.WriteLogFile(config.LogFile,result,config.Inlog)
 	return nil
 }

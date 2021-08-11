@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"FscanX/config"
 	"bytes"
 	"compress/gzip"
 	"crypto/md5"
@@ -456,7 +457,8 @@ func reverseCheck(r *Reverse, timeout int64) bool {
 	time.Sleep(time.Second * time.Duration(timeout))
 	sub := strings.Split(r.Domain, ".")[0]
 	urlStr := fmt.Sprintf("http://api.ceye.io/v1/records?token=%s&type=dns&filter=%s", ceyeApi, sub)
-	fmt.Println(urlStr)
+	config.WriteLogFile(config.LogFile,urlStr,config.Inlog)
+	//fmt.Println(urlStr)
 	req, _ := http.NewRequest("GET", urlStr, nil)
 	resp, err := DoRequest(req, false)
 	if err != nil {
