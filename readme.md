@@ -1,79 +1,64 @@
-# FscanX 
-其实FscanX的灵感来源于fscan和LodanGo这两个开源项目，首先不得不说fscan和LadonGo两个都是非常优秀的内网扫描器。并且其独自的特色也让其在内网扫描器领域独占鳌头。其中LadonGo的插件式让其在扫描时更加专注，而fscan的傻瓜式则让其对内网的信息搜集更加高效。
-但是对于一个懒蛋的我，我选择两者都要（毕竟小孩子才做选择），所以我将其Fscan进行了完全改造，在结合了LadonGo的单插件扫描的同时，保留了Fscan对于Web的漏洞和内网服务的脆弱检测，使其即像LadonGo的同时，也更加流氓。
 
-<br>目前实现的功能如下  （Example）:
-<br>1.CVE-2020-0796 smbghost 插件扫描，支持整个C段式扫描
-```shell
-    FscanX.exe smbghost --thread 60 --noping 192.168.1.1/24
-```
-![img.png](image/img4.png)
-<br>2. MS-17010 Eternal blue 扫描
-```shell
-    FscanX.exe ms17010 192.168.1.1/24
-```
-![img.png](image/img6.png)
-<br>3. ICMP / ping 存活主机探测
-```shell
-    FscanX.exe hostscan icmp --thread 60 192.168.1.1/24
-```
-![img.png](image/img1.png)
-<br>4. TCP 端口扫描（支持脆弱端口的漏洞检测）
-```shell
-    FscanX.exe portscan --thread 60 --fragile --noping 192.168.1.1/24
-```
-![img.png](image/img3.png)
-<br>5. Web 服务检测
-```shell 
-    FscanX.exe webscan --thread 60 --fragile --noping 192.168.1.1/24
-```
-![img.png](image/img2.png)
-<br>6.oxid 网卡信息发现
-```shell
-    FscanX.exe oxidscan 192.168.1.1/24
-```
-![img.png](image/img.png)
-<br>7.netbios 输出主机详细信息
-```shell
-    FscanX.exe hostscan netbios 192.168.1.1/24
-```
-![img.png](image/img5.png)
+<h1 align="center">
+  FsanX 
+  <br>
+</h1>
 
-<br> 上述为一些使用例子，详细可使用-h或--help查看帮助
-<br> 视频演示：（演示系统Linux 采用upx编译FscanX_amd64）
-[![asciicast](https://asciinema.org/a/428622.svg)](https://asciinema.org/a/428622)
-<br> 最后：
-<br> 感谢：https://github.com/shadow1ng/fscan
-<br> 感谢：https://github.com/k8gege/LadonGo
-<br> 2021-8-10 更新计划：
-<br> 目前在实战中发现了FscanX的不足指出，并正在改进，改进计划如下
-<br> 1.在之前版本中存在部分问题，入redis写入失败，ssh id_rsa公私钥连接ssh问题，正在修复
-<br> 2.解决netbios在实战中出现的扫描问题，不能正确扫描，且存在部分输出问题
-<br> 3.增加脆弱服务的直接利用，入mssql的xp_cmdshell,sp_oacreate,clr利用，redis的未授权利用，ssh的命令执行
-<br> 4.增加日志功能，便于webshell当中的使用
-<br> 5.解决icmp被防火墙绊掉，端口扫描的问题
-<br> 6.增加多协议扫描存活主机
+<h4 align="center">golang 语言编写的内网综合利用扫描器</h4>
 
-<br> 2021-8-6 更新:
-<br> 修复ms17010切片长度校验
-<br> 增强实战利用，增加tcp格式基于445，139，135，22端口的存活主机扫描（原因是该些端口为windows主机默认开放端口和Linux主机运维常用端口）
-<br> 修改hoscan命令行格式，增加子命令，将icmp协议扫描，ping扫描，netbios扫描，tcp扫描细分，应对不同的内网环境
-<br> 对netbios扫描输出格式进行处理，增加了FQDN 的输出（完全主机名），来提高zerologon后续的方便使用
-<br> 增加了netbios的域控识别功能
-<br> 增加了默认扫描端口389，53，88端口
+<p align="center">
+  <a href="#credits">介绍</a> •
+  <a href="#key-features">实现功能</a></a> •
+  <a href="#how-to-use">怎样使用</a> •
+  <a href="#download">下载</a> •
+  
+</p>
 
-<br> 2021-8-5 出现问题：
-<br>在使用ms17010扫描时，未对切片长度进行校验，造成了切片范围错误（目前已经完善，但未发布版本）
-<br>实战中不足:走socks5代理扫描时，只有netbios能够扫描到，而icmp无法通过socks5，目前正在思考解决办法
-<br>默认端口扫描问题，对于域控主机的389，88，53 未能正确扫描
-<br>新问题将于下个版本解决
+## 介绍 :
 
-<br> 2021-8-3 更新：
-<br> 1.修复了部分代码逻辑错误，对部分代码逻辑进行修改
-<br> 2.对hostscan扫描方式做出改变，对hostscan 的--noping参数首先采用netbios的存活检测，如果netbios检测失败，则会尝试icmp协议检测而非ping命令检测
-<br> 3.对portscan增加--cmd参数，用于ssh连接后执行命令
-<br> 4.取消portscan的netbios参数
-<br> 5.修复portscan中对于sshkey的验证问题
+事实上FscanX优秀的来源来自fscan和LodanGo这两个开源项目，首先不得不说fscan和LadonGo两个都是非常好的内网扫描器。而且其独特的特色也让它的扫描仪扫描领域独占鳌头。有LadonGo的插件式让其在扫描时更专注，而则将其内网的信息更完美。选择），所以我将其Fscan进行了完全改造，在结合了LadonGo的单插件扫描的同时，保留了Fscan对于Web的漏洞和内网服务的脆弱检测，让即像LadonGo的同时，也更加流氓。但是现在，它似乎已经将要独立出来，因为它具有了一些他们所不具有的功能和便利，为了能在实战中使用更加便利，我会不断改进，并完善FscanX的不足
 
-<br> 如有问题可以提出issue，我们共同商讨解决
+![img.png](img/img.png)
 
+## 功能实现 :
+
+* hostscan -- 主机发现功能
+    - icmp 通过利用`icmp`协议和`ping`命令进行主机发现，其中的`noping`参数可禁用ping来发送icmp包发先存活主机
+    - netbios 通过 netbios 协议来发现存活主机，识别域控，并输出`QSDN（完全主机名）`来为后续`zerologon` 的使用提供便利
+    - smart 通过 netbios 协议以及 `TCP` 端口 `135,139,445,22,21` 进行扫描，共同发现Windows和Linux主机（这并不能发现网关，防火墙等设备，但有时，它是一个不错的选择）
+    - oxid 通过对139端口的扫描，来输出网卡信息，以及发现存活windows主机
+* vulscan -- 主机漏洞发现
+    - ms17010 通过对`445`端口的发包识别，来确定主机是否存在 `MS17010` 永恒之蓝漏洞
+    - smbghost 通过对`445`端口的发包识别，来确定主机是否存在 `smbghost CVE-019-0796` 漏洞
+* portscan -- 端口扫描及其脆弱服务检测
+    - fragile 参数，提供了`mssql,mysql,ssh,ftp,mongodb,redis,postgre` 等数据库及其内网常见服务的弱口令和未授权的检测
+* extend -- 拓展工具
+    - mssql 提供了`xp_cmdshell,sp_oacreate,clr` 的快速利用，方便在弱口令发现的第一刻，完成对服务的利用
+    - ssh 提供了`sshkey` 公私钥认证连接方式以及单条命令执行，方便对ssh服务的快速利用
+    - redis 提供了`redis`公钥写入以及一键反弹`shell`，方便`redis`未授权的快速利用
+* webscan -- web发现及其脆弱服务检测
+   - fragile 是一个`web`脆弱服务的检测信标，它是一个`bool`值，通过它，来判断是否检测内网常见`web`服务的漏洞
+
+## 怎样使用
+
+```bash
+# For Example 
+# hostscan netbios 
+$ FscanX_win_amd64.exe hostscan netbios --thread 2000 192.168.0.1/24
+
+# portscan fragile
+$ FscanX_win_amd64.exe portscan --fragile mssql,ssh,redis 192.168.0.1/24
+
+# extend mssql
+$ FscanX_win_amd64.exe extend mssql --hostname 192.168.0.5 --username sa --password admin@123 --cmd whoami 
+
+# webscan fragile
+$ FscanX_win_amd64.exe webscan --fragile --thread 2000 192.168.0.1/24
+```
+
+Note: 这仅仅只是一些使用例子，详细可通过`--help`参数或`-h`参数进行查看
+## 下载 :
+你能通过 [下载](https://github.com/amitmerchant1990/electron-markdownify/releases/tag/v1.2.0) 来获取程序的二进制文件
+## 感谢 :
+<br> <b>https://github.com/shadow1ngfscan</b>
+<br> <b>https://github.com/8kgege/LadonGo</b>
