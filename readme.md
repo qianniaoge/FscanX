@@ -58,7 +58,7 @@ $ FscanX_win_amd64.exe webscan --fragile --thread 2000 192.168.0.1/24
 
 Note: 这仅仅只是一些使用例子，详细可通过`--help`参数或`-h`参数进行查看
 ## 下载 :
-你能通过 [下载](https://github.com/amitmerchant1990/electron-markdownify/releases/tag/v1.2.0) 来获取程序的二进制文件
+你能通过 [下载](https://github.com/sairson/FscanX/releases/tag/2.0) 来获取程序的二进制文件
 ## 感谢 :
 <br> <b>https://github.com/shadow1ngfscan</b>
 <br> <b>https://github.com/8kgege/LadonGo</b>
